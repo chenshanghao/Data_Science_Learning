@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{Cross-correlation, Convolutional}
+    \title{Basic Visualize}
     
     
     
@@ -281,429 +281,174 @@
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
+{\color{incolor}In [{\color{incolor}5}]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+        \PY{k+kn}{from} \PY{n+nn}{pandas} \PY{k}{import} \PY{n}{DataFrame}\PY{p}{,} \PY{n}{Series}
+        \PY{k+kn}{import} \PY{n+nn}{pymongo}
+        \PY{k+kn}{from} \PY{n+nn}{pymongo} \PY{k}{import} \PY{n}{MongoClient}
+        \PY{k+kn}{import} \PY{n+nn}{pprint}
+        \PY{k+kn}{import} \PY{n+nn}{re}
+        
+        \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
         \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
         \PY{n}{plt}\PY{o}{.}\PY{n}{style}\PY{o}{.}\PY{n}{use}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{seaborn\PYZhy{}whitegrid}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
 \end{Verbatim}
 
 
-    \subsection{0. Correlation of Discrete
-Signals}\label{correlation-of-discrete-signals}
-
-    Correlation is a \textbf{measure} of how \textbf{similar} signals are
-
-    \paragraph{0.1 Formula}\label{formula}
-
-    \[ Corr_{x,y} = \sum_{n=0}^{N-1}x[n]\cdot y[n] \]
-
-    \paragraph{0.2 Example}\label{example}
-
-    \[ 1.\ x =[1, 3, -2, 4] \]
-
-\[ 2.\ y =[2, 3, -1, 3] \]
-
-\[ 3.\ z =[2, -1, 4, -2] \]
+    \paragraph{1. Connect the Mongodb}\label{connect-the-mongodb}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}19}]:} \PY{n}{time} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}
-         \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{)}
-         \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}
-         \PY{n}{z} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{)}
-         
-         \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-         
-         \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{1.0}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{xticklabels}\PY{o}{=}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax2} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax3} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{0.2}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
-         
-         
-         \PY{n}{ax1}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{x}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{ax2}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{color} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{ax3}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{z}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{color} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{green}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{client} \PY{o}{=} \PY{n}{MongoClient}\PY{p}{(}\PY{p}{)}
+        \PY{n}{db\PYZus{}ctTrends} \PY{o}{=} \PY{n}{client}\PY{o}{.}\PY{n}{ctTrends}
+        \PY{n}{db\PYZus{}tlMetadata} \PY{o}{=} \PY{n}{client}\PY{o}{.}\PY{n}{tlMetadata}
 \end{Verbatim}
 
 
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_7_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \[ Corr_{x,y} = x[0]y[0] + x[1]y[1] + x[2]y[2] + x[3]y[3]=(1)\cdot (2)+(3)\cdot (3)+(-2)\cdot (-1)+(4)\cdot (3)=25 \]
-
-\[ Corr_{y,z} = y[0]z[0] + y[1]z[1] + y[2]z[2] + y[3]z[3]=(2)\cdot (2)+(3)\cdot (-1)+(-1)\cdot (4)+(3)\cdot (-2)=-9 \]
-
-    \paragraph{0.3 Normalized Correlation}\label{normalized-correlation}
-
-Consider if \[ z =[500, -1, 4, -2] \] it seems
-\[ Corr_{x,y} < Corr_{y,z} \]
-
-But this is not right. So we need to \textbf{normalized correlation}.
-
-    \paragraph{0.4 Formula}\label{formula}
-
-    \[ Corr\_norm_{x,y}=\frac{\sum_{n=0}^{N-1}x[n]\cdot y[n]}{\sqrt{\sum_{n=0}^{N-1}x^{2}[n]\cdot \sum_{n=0}^{N-1}y^{2}[n]}} \]
-
-    Suppose: \[ z =[2, -1, 4, -2] \]
-\[ Corr_{x,y} = x[0]y[0] + x[1]y[1] + x[2]y[2] + x[3]y[3]=(1)\cdot (2)+(3)\cdot (3)+(-2)\cdot (-1)+(4)\cdot (3)=25 \]
-\[ norm\_den_{x,y}=sqrt((1+9+3+16)(4+9+1+9)) = 26.27 \]
-\[ norm\_cov_{x,y}=25/26.27 = 0.95 \]
-
-\[ Corr_{y,z} = y[0]z[0] + y[1]z[1] + y[2]z[2] + y[3]z[3]=(2)\cdot (100)+(3)\cdot (-1)+(-1)\cdot (4)+(3)\cdot (-2)=187 \]
-\[ norm\_den_{x,y}=sqrt((24)(10000+1+16+4)) = 490.41 \]
-\[ norm\_cov_{x,y}=25/26.27 = 0.38 \]
-
-    \subsection{1. Cross-correlation}\label{cross-correlation}
-
-    \paragraph{1.1 Definiation}\label{definiation}
-
-    \textbf{Cross-correlation} is the comparison of \textbf{two different
-time series} to detect if there is a \textbf{correlation} between
-metrics with the same maximum and minimum values. For example: ``Are two
-audio signals in phase?''
-
-    \paragraph{1.2 Formula}\label{formula}
-
-    \[ G[i, j] = \sum_{u=-k}^{k}\sum_{v=-k}^{k}h[u, v]\cdot F[i+u, j+v] \]
-
-\[ k: number\ of\ negihbor \] \[ h[u,v]: weight \]
-
-    Notice: \textbf{From left to right} and \textbf{from top to bottom}
-
-    \paragraph{1.3 Example}\label{example}
-
-    \begin{figure}
-\centering
-\includegraphics{img/crosscorrelation.jpg}
-\caption{title}
-\end{figure}
-
-    \[ G[3,3 ] = a*A+b*B+c*C+d*D+e*E+f*F+g*G+h*H+i*I \]
-
-    \paragraph{1.4 Time-series supplemental
-materials}\label{time-series-supplemental-materials}
-
-\[ R(i) = \int_{-\infty}^{-\infty}x(t)\cdot y(t+i)dt \]
-
-Where \textbf{x(t)} and \textbf{y(t)} is a function of time;
-
-\begin{verbatim}
- i is the time delay. It can be negative, zero or positive;
-
- R is corss correlation, which is a function of the time delay i.
-
- When x(t) = y(t), cross correlation becomes auto correlation.
-\end{verbatim}
-
-    \paragraph{1.5 Example}\label{example}
-
-    \[ 1.\ x =[0.1,0.2,-0.1,4.1,-2,1.5,-0.1] \]
-\[ 2.\ y =[0.1,4,-2.2,1.6,0.1,0.1,0.2] \]
-
-    \subparagraph{1.5.1 0 time lag}\label{time-lag}
+    \paragraph{2. Get the trend log data from
+Mongodb}\label{get-the-trend-log-data-from-mongodb}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}23}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{4.1}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mf}{1.5}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{)}
-         \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{2.2}\PY{p}{,}\PY{l+m+mf}{1.6}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{]}\PY{p}{)}
-         \PY{n}{time} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{]}\PY{p}{)}
-         
-         \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-         
-         \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{1.0}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{xticklabels}\PY{o}{=}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax2} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax1}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{x}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{ax2}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{color} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_26_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \[ Correlation_{zero \ lag} = (0.1)\cdot (0.1)+(0.2)\cdot(0.4)+(-0.1)\cdot(-2.2)+(4.1)\cdot(1.6)+(-2)\cdot(0.1)+(1.5)\cdot(0.1)+(-0.1)\cdot(0.2) =7.52 \]
-
-    \subparagraph{1.5.2 1 time lag}\label{time-lag}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}34}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{4.1}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mf}{1.5}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{)}
-         \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{2.2}\PY{p}{,}\PY{l+m+mf}{1.6}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{]}\PY{p}{)}
-         \PY{n}{time} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{]}\PY{p}{)}
-         \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-         \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{1.0}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{xticklabels}\PY{o}{=}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,} \PY{n}{xlim} \PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax2} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,} \PY{n}{xlim} \PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax1}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{x}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{ax2}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{color} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_29_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \[ Correlation_{one \ lag} = (0.2)\cdot (0.1)+(-0.1)\cdot(4)+(4.1)\cdot(-2.2)+(-2)\cdot(1.6)+(1.5)\cdot(0.1)+(-0.1)\cdot(0.1) =-12.46 \]
-
-    \subparagraph{1.5.3 2 time lag}\label{time-lag}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}35}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{4.1}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mf}{1.5}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{)}
-         \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{2.2}\PY{p}{,}\PY{l+m+mf}{1.6}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{]}\PY{p}{)}
-         \PY{n}{time} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{]}\PY{p}{)}
-         \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-         \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{1.0}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{xticklabels}\PY{o}{=}\PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,} \PY{n}{xlim} \PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax2} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{0.6}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{5}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,} \PY{n}{xlim} \PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{8}\PY{p}{)}\PY{p}{)}
-         \PY{n}{ax1}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{p}{,} \PY{n}{x}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{ax2}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{time}\PY{o}{+}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{color} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_32_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \[ Correlation_{two \ lag} = (-0.1)\cdot(0.1)+(4.1)\cdot(4)+(-2)\cdot(-2.2)+(1.5)\cdot(1.6)+(-0.1)\cdot(0.1) =23.18 \]
-
-    \subparagraph{1.5.4 Result}\label{result}
-
-    \[ Correlation\_Sequence = [7.52, -12.46, 23.18, -11.05, 6.02, -0.25, -0.01] \]
-
-    \paragraph{1.6 Python Library
-Calculation}\label{python-library-calculation}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}48}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{4.1}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mf}{1.5}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{)}
-         \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{2.2}\PY{p}{,}\PY{l+m+mf}{1.6}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{]}\PY{p}{)}
-         \PY{n}{np}\PY{o}{.}\PY{n}{correlate}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{same}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}48}]:} array([  0.99,   0.1 ,   0.31,   7.52, -12.46,  23.18, -11.05])
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}115}]:} \PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{signal}
-          \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{4.1}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mf}{1.5}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{0.1}\PY{p}{]}\PY{p}{)}
-          \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mf}{2.2}\PY{p}{,}\PY{l+m+mf}{1.6}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.1}\PY{p}{,}\PY{l+m+mf}{0.2}\PY{p}{]}\PY{p}{)}
-          \PY{n}{corr} \PY{o}{=} \PY{n}{signal}\PY{o}{.}\PY{n}{correlate}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{n}{mode} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{same}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-          \PY{n}{corr}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}115}]:} array([  0.99,   0.1 ,   0.31,   7.52, -12.46,  23.18, -11.05])
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}118}]:} \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-          \PY{c+c1}{\PYZsh{} Search trend volume}
-          \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}subplot}\PY{p}{(}\PY{l+m+mi}{311}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{x}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{x data}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-          
-          \PY{n}{total} \PY{o}{=} \PY{n+nb}{sum}\PY{p}{(}\PY{n}{x}\PY{p}{)}
-          \PY{n}{av} \PY{o}{=} \PY{n}{total} \PY{o}{/} \PY{n+nb}{len}\PY{p}{(}\PY{n}{x}\PY{p}{)}
-          \PY{n}{z} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{n}{av} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n}{x}\PY{p}{]}
-          
-          \PY{c+c1}{\PYZsh{} Random: \PYZdq{}search trend volume\PYZdq{}}
-          \PY{n}{ax2} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}subplot}\PY{p}{(}\PY{l+m+mi}{312}\PY{p}{)}
-          \PY{n}{ax2}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{y}\PY{p}{)}
-          \PY{n}{ax2}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{y data}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-          
-          \PY{n}{total1} \PY{o}{=} \PY{n+nb}{sum}\PY{p}{(}\PY{n}{y}\PY{p}{)}
-          \PY{n}{av1} \PY{o}{=} \PY{n}{total1} \PY{o}{/} \PY{n+nb}{len}\PY{p}{(}\PY{n}{y}\PY{p}{)}
-          \PY{n}{z1} \PY{o}{=} \PY{p}{[}\PY{n}{i} \PY{o}{\PYZhy{}} \PY{n}{av1} \PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n}{y}\PY{p}{]}
-          
-          \PY{c+c1}{\PYZsh{} Is there a pattern in search trend for this keyword?}
-          \PY{n}{ax3} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}subplot}\PY{p}{(}\PY{l+m+mi}{313}\PY{p}{)}
-          \PY{n}{ax3}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Cross correlation of random data}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-          \PY{n}{ax3}\PY{o}{.}\PY{n}{xcorr}\PY{p}{(}\PY{n}{z}\PY{p}{,} \PY{n}{z1}\PY{p}{,} \PY{n}{usevlines}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{maxlags}\PY{o}{=}\PY{k+kc}{None}\PY{p}{,} \PY{n}{normed}\PY{o}{=}\PY{k+kc}{False}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
-          \PY{n}{ax3}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
-          \PY{n}{plt}\PY{o}{.}\PY{n}{ylim}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{25}\PY{p}{)}
-          \PY{n}{plt}\PY{o}{.}\PY{n}{tight\PYZus{}layout}\PY{p}{(}\PY{p}{)}
-          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_39_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \subsection{2 Normalized
-cross-correlation}\label{normalized-cross-correlation}
-
-The \textbf{comparison} of \textbf{two time series}, but using \textbf{a
-different scoring result}. Instead of simple cross-correlation, it can
-compare metrics with \textbf{different value ranges}.
-
-    \[ NCC =\frac{\sum_{i=1}^{MN}x_{i}y_{i}}{\sqrt{\sum_{i=1}^{MN}x_{i}^{2}\cdot\sum_{i=1}^{MN}y_{i}^{2} }} \]
-
-    \paragraph{2.1 Example}\label{example}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}119}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{2.0}\PY{p}{,}\PY{l+m+mf}{3.0}\PY{p}{]}\PY{p}{)}
-          \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{2.0}\PY{p}{,}\PY{l+m+mf}{3.0}\PY{p}{]}\PY{p}{)}
-          \PY{k+kn}{from} \PY{n+nn}{obspy}\PY{n+nn}{.}\PY{n+nn}{signal}\PY{n+nn}{.}\PY{n+nn}{cross\PYZus{}correlation} \PY{k}{import} \PY{n}{correlate}
-          \PY{n}{correlate}\PY{p}{(}\PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{shift}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{normalize}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{demean}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}119}]:} array([ 0.21428571,  0.57142857,  1.        ,  0.57142857,  0.21428571])
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}123}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{2.0}\PY{p}{,}\PY{l+m+mf}{3.0}\PY{p}{]}\PY{p}{)}
-          \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{2.0}\PY{p}{,}\PY{l+m+mf}{3.0}\PY{p}{]}\PY{p}{)}
-          \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-          \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}subplot}\PY{p}{(}\PY{l+m+mi}{111}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{xcorr}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{n}{usevlines}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{maxlags}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{normed}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{grid}\PY{p}{(}\PY{k+kc}{True}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{set\PYZus{}ylim}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mf}{1.1}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{axhline}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{black}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{)}
-          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_44_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \paragraph{2.2 Zero-mean Normalized
-Cross-Correlation}\label{zero-mean-normalized-cross-correlation}
-
-    \[ ZNCC =\frac{\sum_{i=1}^{MN}(x_{i}-\bar{x})(y_{i}-\bar{y})}{\sqrt{\sum_{i=1}^{MN}(x_{i}-\bar{x})^{2}\cdot\sum_{i=1}^{MN}(y_{i}-\bar{y})^{2} }} \]
-
-    where \textbf{x̄} and \textbf{ȳ} are the \textbf{mean intensity values}.
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}128}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{2.0}\PY{p}{,}\PY{l+m+mf}{3.0}\PY{p}{]}\PY{p}{)}
-          \PY{n}{y} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{1.0}\PY{p}{,}\PY{l+m+mf}{2.0}\PY{p}{]}\PY{p}{)}
-          \PY{k+kn}{from} \PY{n+nn}{obspy}\PY{n+nn}{.}\PY{n+nn}{signal}\PY{n+nn}{.}\PY{n+nn}{cross\PYZus{}correlation} \PY{k}{import} \PY{n}{correlate}
-          \PY{n}{result} \PY{o}{=} \PY{n}{correlate}\PY{p}{(}\PY{n}{x}\PY{p}{,}\PY{n}{y}\PY{p}{,}\PY{n}{shift}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{,}\PY{n}{normalize}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{demean}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
-          \PY{n}{result}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}128}]:} array([-0.57735027,  0.28867513,  0.8660254 , -0.28867513, -0.28867513])
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}135}]:} \PY{n}{x} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{array}\PY{p}{(}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{)}
-          \PY{n}{y} \PY{o}{=} \PY{n}{result}
-          \PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
-          \PY{n}{ax1} \PY{o}{=} \PY{n}{fig}\PY{o}{.}\PY{n}{add\PYZus{}axes}\PY{p}{(}\PY{p}{[}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{l+m+mf}{1.0}\PY{p}{,} \PY{l+m+mf}{0.8}\PY{p}{,} \PY{l+m+mf}{0.4}\PY{p}{]}\PY{p}{,} \PY{n}{xticklabels}\PY{o}{=}\PY{p}{[}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2}\PY{p}{,}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,} \PY{n}{ylim}\PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,} \PY{n}{xlim} \PY{o}{=}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{)}
-          \PY{n}{ax1}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}ok}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{color} \PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{;}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_49_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \paragraph{2.3 Auto-correlation}\label{auto-correlation}
-
-    The \textbf{comparison} of a \textbf{time series} with itself at a
-\textbf{different time}. It aims, for example, to \textbf{detect
-repeating patterns or seasonality}. For example: ``Is there weekly
-seasonality on a server website?'' ``Does the current week's data highly
-correlate with that of the previous week?''
-
-You can see the example from \textbf{Normalized cross-correlation}.
-
-\href{https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.signal.correlate.html}{scipy.signal.correlate}
-
-    \subsection{3. Convolution}\label{convolution}
-
-    \paragraph{3.1 Formula}\label{formula}
-
-    \[ G[i,j]=\sum_{v=-k}^{k}\sum_{v=-k}^{k}h[u,v]\cdot F[i-u,j-v] \]
-Denoted by: \[ G = h*F \]
-
-\href{https://zh.wikipedia.org/wiki/\%E5\%8D\%B7\%E7\%A7\%AF}{Convolution}
-
-\href{https://currents.soest.hawaii.edu/ocn_data_analysis/_static/SEM_EDOF.html}{ocn\_data\_analysis}
-
-\href{https://currents.soest.hawaii.edu/ocn_data_analysis/_static/SEM_EDOF.html}{relate
-material}
-
-    \textbf{Flip fliter} in both dimensions
-
-\begin{verbatim}
-1) Bottom to Top
-2) Right to Left
-\end{verbatim}
-
-Then apply \textbf{cross-correlation}
-
-    \begin{figure}
-\centering
-\includegraphics{img/convolution.jpg}
-\caption{title}
-\end{figure}
-
-    \paragraph{3.2 1-D Formula}\label{d-formula}
-
-    \[ y(t)=\int_{-\infty}^{+\infty}x(\imath )h(t-\imath )d\imath = \int_{-\infty}^{+\infty}h(\imath )x(t-\imath )d\imath \]
-
-    \paragraph{3.3 Cross-correlation vs
-Convolution}\label{cross-correlation-vs-convolution}
-
-    \includegraphics{img/compare_1.jpg} \includegraphics{img/compare_2.jpg}
-\includegraphics{img/compare_3.jpg} \includegraphics{img/compare_4.jpg}
-\includegraphics{img/compare_5.jpg} \includegraphics{img/compare_6.jpg}
-\includegraphics{img/compare_7.jpg}
-
-    \paragraph{3.4 Properties of
-Convolution}\label{properties-of-convolution}
-
-    \begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\item
-  Linear and Shift Invariants
-
-  Behaves the same everywhere(i.e., the value of the output depends on
-  the pattern in the image neighborhood, not the position of the
-  neigborhood)
-\item
-  Commutative \[ F*G=G*F \]
-\item
-  Associative \[ (F*G)*H=F*(G*H) \]
-\item
-  Identity: Unit Impulse E={[}....0, 0, 1, 0, 0,....{]},
-
-  F*E=F
-\item
-  Separable If the filter is separable, convolve all rows, then convolve
-  all columns
-\end{enumerate}
-
-    \paragraph{3.5 Demo Code}\label{demo-code}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}137}]:} \PY{c+c1}{\PYZsh{} Note how the convolution operator flips the second array before “sliding” the two across one another:}
-          \PY{n+nb}{print}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{convolve}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mf}{0.5}\PY{p}{]}\PY{p}{)}\PY{p}{)}
-          
-          \PY{c+c1}{\PYZsh{} Only return the middle values of the convolution. Contains boundary effects, where zeros are taken into account:}
-          \PY{n+nb}{print}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{convolve}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mf}{0.5}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{same}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
-          
-          \PY{c+c1}{\PYZsh{} The two arrays are of the same length, so there is only one position where they completely overlap:}
-          \PY{n+nb}{print}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{convolve}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mf}{0.5}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{valid}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}3}]:} \PY{c+c1}{\PYZsh{} Get the date}
+        \PY{n}{regx} \PY{o}{=} \PY{n}{re}\PY{o}{.}\PY{n}{compile}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZca{}3352}\PY{l+s+s2}{\PYZbs{}}\PY{l+s+s2}{.750000}\PY{l+s+s2}{\PYZbs{}}\PY{l+s+s2}{.TL16\PYZhy{}201[5678] *}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{re}\PY{o}{.}\PY{n}{IGNORECASE}\PY{p}{)}  \PY{c+c1}{\PYZsh{}\PYZbs{}.*\PYZhy{}2018\PYZhy{}06\PYZhy{}*\PYZbs{}}
+        \PY{n}{data\PYZus{}example} \PY{o}{=} \PY{n}{db\PYZus{}ctTrends}\PY{o}{.}\PY{n}{Latest}\PY{o}{.}\PY{n}{find}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{regx}\PY{p}{\PYZcb{}}\PY{p}{)}\PY{o}{.}\PY{n}{limit}\PY{p}{(}\PY{l+m+mi}{1000}\PY{p}{)}
+        \PY{n}{data\PYZus{}example\PYZus{}list} \PY{o}{=} \PY{n+nb}{list}\PY{p}{(}\PY{n}{data\PYZus{}example}\PY{p}{)}
+        \PY{n}{pprint}\PY{o}{.}\PY{n}{pprint}\PY{p}{(}\PY{n}{data\PYZus{}example\PYZus{}list}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-[ 0.   1.   2.5  4.   1.5]
-[ 1.   2.5  4. ]
-[ 2.5]
+\{'14:00:00': 21.394100189208984,
+ '14:30:00': 21.072099685668945,
+ '15:00:00': 21.395999908447266,
+ '15:30:00': 21.493000030517578,
+ '16:00:00': 21.808399200439453,
+ '16:30:00': 21.960399627685547,
+ '17:00:00': 22.956899642944336,
+ '17:30:00': 23.474599838256836,
+ '18:00:00': 23.85919952392578,
+ '18:30:00': 24.153900146484375,
+ '19:00:00': 24.436899185180664,
+ '19:30:00': 24.708099365234375,
+ '20:00:00': 24.64419937133789,
+ '20:30:00': 24.604299545288086,
+ '21:00:00': 24.543899536132812,
+ '21:30:00': 24.485200881958008,
+ '22:00:00': 24.185300827026367,
+ '22:30:00': 24.076499938964844,
+ '23:00:00': 24.147600173950195,
+ '23:30:00': 24.11210060119629,
+ '\_id': '3352.750000.TL16-2015-05-08',
+ 'd': 750000,
+ 'dt': '2015-05-08',
+ 'i': 16,
+ 'l': 3352,
+ 'rev': 4,
+ 't': 'TL',
+ 'ts': datetime.datetime(2016, 6, 7, 16, 53, 16),
+ 'tt': 'Polled',
+ 'uf': 14400\}
 
     \end{Verbatim}
+
+    \paragraph{3. Transfer the numerical value data to pandas Series(Need to
+optimize?)}\label{transfer-the-numerical-value-data-to-pandas-seriesneed-to-optimize}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k+kn}{from} \PY{n+nn}{datetime} \PY{k}{import} \PY{n}{datetime}
+        
+        \PY{c+c1}{\PYZsh{} Convert date string to datetime}
+        \PY{k}{def} \PY{n+nf}{datetime\PYZus{}convert}\PY{p}{(}\PY{n}{a}\PY{p}{,} \PY{n}{b}\PY{p}{)}\PY{p}{:}
+            \PY{k}{return} \PY{n}{datetime}\PY{o}{.}\PY{n}{strptime}\PY{p}{(}\PY{n}{a} \PY{o}{+} \PY{n}{b}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{Y\PYZhy{}}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{m\PYZhy{}}\PY{l+s+si}{\PYZpc{}d}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{H:}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{M:}\PY{l+s+s1}{\PYZpc{}}\PY{l+s+s1}{S}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        
+        \PY{n}{pat} \PY{o}{=} \PY{n}{re}\PY{o}{.}\PY{n}{compile}\PY{p}{(}\PY{l+s+sa}{r}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{d}\PY{l+s+si}{\PYZob{}2\PYZcb{}}\PY{l+s+s1}{:}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{d}\PY{l+s+si}{\PYZob{}2\PYZcb{}}\PY{l+s+s1}{:}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{d}\PY{l+s+si}{\PYZob{}2\PYZcb{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{data\PYZus{}example\PYZus{}pandas} \PY{o}{=} \PY{p}{(}\PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{p}{[}\PY{p}{[}\PY{n}{datetime\PYZus{}convert}\PY{p}{(}\PY{n}{r}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{dt}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{k}\PY{p}{)}\PY{p}{,} \PY{n}{v}\PY{p}{]} \PY{k}{for} \PY{n}{r} \PY{o+ow}{in} \PY{n}{data\PYZus{}example\PYZus{}list} \PY{k}{for} \PY{n}{k}\PY{p}{,} \PY{n}{v} \PY{o+ow}{in} \PY{n}{r}\PY{o}{.}\PY{n}{items}\PY{p}{(}\PY{p}{)} \PY{k}{if} \PY{n}{pat}\PY{o}{.}\PY{n}{match}\PY{p}{(}\PY{n}{k}\PY{p}{)}\PY{p}{]}\PY{p}{,} 
+                                            \PY{n}{columns}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time\PYZhy{}Stamp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Value}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{set\PYZus{}index}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Time\PYZhy{}Stamp}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Value}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+        
+        \PY{c+c1}{\PYZsh{} print the first ten lines of data}
+        \PY{n+nb}{print}\PY{p}{(}\PY{n}{data\PYZus{}example\PYZus{}pandas}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{:}\PY{l+m+mi}{10}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Time-Stamp
+2015-05-08 14:00:00    21.394100
+2015-05-08 14:30:00    21.072100
+2015-05-08 15:00:00    21.396000
+2015-05-08 15:30:00    21.493000
+2015-05-08 16:00:00    21.808399
+2015-05-08 16:30:00    21.960400
+2015-05-08 17:00:00    22.956900
+2015-05-08 17:30:00    23.474600
+2015-05-08 18:00:00    23.859200
+2015-05-08 18:30:00    24.153900
+Name: Value, dtype: float64
+
+    \end{Verbatim}
+
+    \paragraph{4. Get the meta data from
+Mongodb}\label{get-the-meta-data-from-mongodb}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{n}{regx} \PY{o}{=} \PY{n}{re}\PY{o}{.}\PY{n}{compile}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZca{}3352}\PY{l+s+s2}{\PYZbs{}}\PY{l+s+s2}{.750000}\PY{l+s+s2}{\PYZbs{}}\PY{l+s+s2}{.TL16}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{re}\PY{o}{.}\PY{n}{IGNORECASE}\PY{p}{)}  \PY{c+c1}{\PYZsh{}\PYZbs{}.*\PYZhy{}2018\PYZhy{}06\PYZhy{}*}
+        \PY{n}{data\PYZus{}example\PYZus{}meta} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n+nb}{list}\PY{p}{(}\PY{n}{db\PYZus{}tlMetadata}\PY{o}{.}\PY{n}{Latest}\PY{o}{.}\PY{n}{find}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n}{regx}\PY{p}{\PYZcb{}}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+        \PY{n}{data\PYZus{}example\PYZus{}meta}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}5}]:}                 \_id       first        last  log\_interval mon\_obj\_name  \textbackslash{}
+        0  3352.750000.TL16  2015-05-08  2018-06-14        180000       AH3SAT   
+        
+               mon\_obj\_ref          monitored\_object       name source tl\_type  \textbackslash{}
+        0  3352.750000.AI1  750000.AI1.Present\_Value  AH3SAT\textasciitilde{}TL    rtl  Polled   
+        
+                           ts\_utc units  
+        0 2018-06-15 19:07:03.284    °C  
+\end{Verbatim}
+            
+    \paragraph{5. Plotting the Figure}\label{plotting-the-figure}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}6}]:} \PY{n}{fig}\PY{p}{,} \PY{n}{ax} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{)}
+        \PY{n}{ax}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{data\PYZus{}example\PYZus{}pandas}\PY{o}{.}\PY{n}{index}\PY{o}{.}\PY{n}{values}\PY{p}{,} \PY{n}{data\PYZus{}example\PYZus{}pandas}\PY{o}{.}\PY{n}{values}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{n+nb}{str}\PY{p}{(}\PY{n}{data\PYZus{}example\PYZus{}meta}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{values}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{)}
+        \PY{n}{leg} \PY{o}{=} \PY{n}{ax}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}\PY{p}{;}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_10_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \subparagraph{Kaizen output}\label{kaizen-output}
+
+    \begin{figure}
+\centering
+\includegraphics{img/Kaizen.jpg}
+\caption{title}
+\end{figure}
+
+    \paragraph{6. Useful Regular
+Expressions}\label{useful-regular-expressions}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor} }]:} \PY{c+c1}{\PYZsh{}\PYZsh{} Find just one building\PYZsq{}s data}
+        \PY{c+c1}{\PYZsh{} regx = re.compile(\PYZdq{}\PYZca{}3351\PYZbs{}.*\PYZdq{}, re.IGNORECASE)}
+        \PY{c+c1}{\PYZsh{} print(db\PYZus{}ctTrends.Latest.find\PYZus{}one(\PYZob{}\PYZsq{}\PYZus{}id\PYZsq{}: regx\PYZcb{}))}
+        
+        \PY{c+c1}{\PYZsh{}\PYZsh{} Find one device(710224) data with one building(3352)}
+        \PY{c+c1}{\PYZsh{} regx = re.compile(\PYZdq{}\PYZca{}3352\PYZbs{}.710224\PYZbs{}.*\PYZdq{}, re.IGNORECASE)}
+        \PY{c+c1}{\PYZsh{} print(db\PYZus{}ctTrends.Latest.find\PYZus{}one(\PYZob{}\PYZsq{}\PYZus{}id\PYZsq{}: regx\PYZcb{}))}
+        
+        \PY{c+c1}{\PYZsh{}\PYZsh{} find only SFU data}
+        \PY{c+c1}{\PYZsh{} regx = re.compile(\PYZdq{}\PYZca{}335[012]\PYZbs{}.*\PYZdq{}, re.IGNORECASE)}
+        \PY{c+c1}{\PYZsh{} print(db\PYZus{}ctTrends.Latest.find\PYZus{}one(\PYZob{}\PYZsq{}\PYZus{}id\PYZsq{}: regx\PYZcb{}))}
+        
+        \PY{c+c1}{\PYZsh{}\PYZsh{} find June data for one building.}
+        \PY{c+c1}{\PYZsh{} regx = re.compile(\PYZdq{}\PYZca{}3352\PYZbs{}.\PYZbs{}d\PYZob{}0,6\PYZcb{}\PYZbs{}.[0\PYZhy{}9a\PYZhy{}zA\PYZhy{}Z]\PYZob{}0,8\PYZcb{}\PYZhy{}2018\PYZhy{}06 *\PYZdq{}, re.IGNORECASE)  \PYZsh{}\PYZbs{}.*\PYZhy{}2018\PYZhy{}06\PYZhy{}*}
+        \PY{c+c1}{\PYZsh{} print(db\PYZus{}ctTrends.Latest.find\PYZus{}one(\PYZob{}\PYZsq{}\PYZus{}id\PYZsq{}: regx\PYZcb{}))}
+\end{Verbatim}
+
 
 
     % Add a bibliography block to the postdoc
